@@ -1,0 +1,63 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of the "go test" command
+*.coverprofile
+*.tmp
+
+# Directories
+/vendor/
+bin/
+build/
+dist/
+data/
+
+# Editor backups and temporary files
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+
+# IDE and editor settings
+.idea/
+.vscode/
+*.iml
+
+# Dependency directories (for vendoring)
+Godeps/
+
+# Go module files
+go.sum
+
+# Generated files
+*.gen.go
+*.pb.go
+*.mock.go
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Specific to JetBrains IDEs
+/.idea/
+/*.iml
+
+# Specific to Visual Studio Code
+.vscode/
+
+# macOS-specific
+.DS_Store
+
+# Linux-specific
+*.pid
+
+# Windows-specific
+Thumbs.db
+desktop.ini
