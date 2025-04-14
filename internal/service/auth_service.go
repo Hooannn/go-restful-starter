@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/Hooannn/EventPlatform/internal/constant"
+	"github.com/Hooannn/EventPlatform/internal/entity"
 	"github.com/Hooannn/EventPlatform/internal/repository"
 	"github.com/Hooannn/EventPlatform/internal/types"
 	"github.com/Hooannn/EventPlatform/internal/util"
@@ -20,8 +21,7 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 }
 
 func (s *AuthService) Login(username, password string) (*types.LoginResponse, *exception.HttpException) {
-
-	user, err := s.UserRepo.FindByEmail(username)
+	user, err := s.UserRepo.GetDetails(entity.User{Email: username})
 
 	invalidException := exception.NewBadRequestException(constant.InvalidCredentials, nil)
 
@@ -43,6 +43,8 @@ func (s *AuthService) Login(username, password string) (*types.LoginResponse, *e
 	if err != nil {
 		return nil, exception.NewInteralServerError(err.Error(), err)
 	}
+
+	//Save refresh token to redis
 
 	return &types.LoginResponse{
 		AccessToken:  accessToken,

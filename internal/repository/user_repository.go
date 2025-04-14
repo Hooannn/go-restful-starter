@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/Hooannn/EventPlatform/internal/entity"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -21,17 +20,17 @@ func (r *UserRepository) Create(user *entity.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByEmail(email string) (*entity.User, error) {
+func (r *UserRepository) GetDetails(qUser entity.User) (*entity.User, error) {
 	var user entity.User
-	if err := r.db.Model(entity.User{Email: email}).First(&user).Error; err != nil {
+	if err := r.db.Preload("Roles.Permissions").Where(qUser).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *UserRepository) FindById(id string) (*entity.User, error) {
+func (r *UserRepository) Get(qUser entity.User) (*entity.User, error) {
 	var user entity.User
-	if err := r.db.Model(entity.User{ID: uuid.MustParse(id)}).First(&user).Error; err != nil {
+	if err := r.db.Where(qUser).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

@@ -1,8 +1,7 @@
 package handler
 
 import (
-	"net/http"
-
+	"github.com/Hooannn/EventPlatform/internal/constant"
 	"github.com/Hooannn/EventPlatform/internal/service"
 	"github.com/Hooannn/EventPlatform/internal/types"
 	api "github.com/Hooannn/EventPlatform/pkg/api"
@@ -38,6 +37,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	res := api.NewOKResponse(http.StatusText(http.StatusOK), data)
+	res := api.NewOKResponse(constant.LoginSuccess, data)
 	res.Send(c)
 }

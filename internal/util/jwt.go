@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"slices"
 	"time"
 
 	"github.com/Hooannn/EventPlatform/configs"
@@ -19,6 +20,12 @@ func CreateAccessToken(user *entity.User) (string, error) {
 	permissions := make([]string, 0)
 	for _, role := range user.Roles {
 		roles = append(roles, role.Name)
+
+		for _, permission := range role.Permissions {
+			if !slices.Contains(permissions, permission.Name) {
+				permissions = append(permissions, permission.Name)
+			}
+		}
 	}
 
 	claims := &types.JwtCustomClaims{
