@@ -5,10 +5,24 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type JwtCustomClaims struct {
+type JwtAccessTokenClaims struct {
 	Roles       []string `json:"roles"`
 	Permissions []string `json:"permissions"`
 	jwt.RegisteredClaims
+}
+
+type JwtRefreshTokenClaims struct {
+	DeviceID string `json:"device_id"`
+	jwt.RegisteredClaims
+}
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type RefreshResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type LoginRequest struct {

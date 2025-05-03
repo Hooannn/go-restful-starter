@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Hooannn/EventPlatform/configs"
+	"github.com/Hooannn/EventPlatform/internal/constant"
 	"github.com/Hooannn/EventPlatform/internal/util"
 	"github.com/Hooannn/EventPlatform/pkg/api"
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,7 @@ func WithJwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		api.NewUnauthorizedException(http.StatusText(http.StatusUnauthorized), nil).Send(c)
+		api.NewUnauthorizedException(constant.MissingToken, nil).Send(c)
 		c.Abort()
 	}
 }

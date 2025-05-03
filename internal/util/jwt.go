@@ -14,7 +14,7 @@ import (
 
 func CreateAccessToken(user *entity.User) (string, error) {
 	cfg := configs.LoadConfig(".env")
-	exp := time.Now().Add(time.Second * time.Duration(cfg.JWTAccessTokenExpireTime)).Unix()
+	exp := time.Now().Add(time.Hour * time.Duration(cfg.JWTAccessTokenExpireHours)).Unix()
 
 	roles := make([]string, 0)
 	permissions := make([]string, 0)
@@ -28,7 +28,7 @@ func CreateAccessToken(user *entity.User) (string, error) {
 		}
 	}
 
-	claims := &types.JwtCustomClaims{
+	claims := &types.JwtAccessTokenClaims{
 		Roles:       roles,
 		Permissions: permissions,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -48,18 +48,23 @@ func CreateAccessToken(user *entity.User) (string, error) {
 	return t, err
 }
 
-func CreateRefreshToken(user *entity.User) (string, error) {
+func CreateRefreshToken(user *entity.User, deviceID string) (string, error) {
 	cfg := configs.LoadConfig(".env")
-	exp := time.Now().Add(time.Second * time.Duration(cfg.JWTRefreshTokenExpireTime)).Unix()
-	claimsRefresh := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Unix(exp, 0)),
-		Issuer:    cfg.AppName,
-		Subject:   user.ID.String(),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		Audience:  []string{cfg.AppName},
-		NotBefore: jwt.NewNumericDate(time.Now()),
+	exp := time.Now().Add(time.Hour * time.Duration(cfg.JWTRefreshTokenExpireHours)).Unix()
+
+	claims := &types.JwtRefreshTokenClaims{
+		DeviceID: deviceID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Unix(exp, 0)),
+			Issuer:    cfg.AppName,
+			Subject:   user.ID.String(),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Audience:  []string{cfg.AppName},
+			NotBefore: jwt.NewNumericDate(time.Now()),
+		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsRefresh)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	refreshToken, err := token.SignedString([]byte(cfg.JWTRefreshTokenSecret))
 	if err != nil {
 		return "", err
@@ -75,7 +80,16 @@ func IsAuthorized(requestToken string, secret string) (bool, error) {
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return false, err
+		switch {
+		case errors.Is(err, jwt.ErrSignatureInvalid):
+			return false, errors.New(constant.InvalidTokenSignature)
+		case errors.Is(err, jwt.ErrTokenMalformed):
+			return false, errors.New(constant.InvalidToken)
+		case errors.Is(err, jwt.ErrTokenExpired):
+			return false, errors.New(constant.ExpiredToken)
+		default:
+			return false, err
+		}
 	}
 	return true, nil
 }
@@ -89,7 +103,16 @@ func ExtractToken(requestToken string, secret string) (jwt.MapClaims, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		switch {
+		case errors.Is(err, jwt.ErrSignatureInvalid):
+			return nil, errors.New(constant.InvalidTokenSignature)
+		case errors.Is(err, jwt.ErrTokenMalformed):
+			return nil, errors.New(constant.InvalidToken)
+		case errors.Is(err, jwt.ErrTokenExpired):
+			return nil, errors.New(constant.ExpiredToken)
+		default:
+			return nil, err
+		}
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)

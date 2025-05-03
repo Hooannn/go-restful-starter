@@ -19,6 +19,8 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
+	deviceID := c.GetHeader("x-device-id")
+
 	var request types.LoginRequest
 
 	err := c.ShouldBind(&request)
@@ -29,14 +31,57 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	var data *types.LoginResponse
-	data, err = h.AuthService.Login(request.Username, request.Password)
+	data, ex := h.AuthService.Login(c, deviceID, request.Username, request.Password)
 
-	if err := err.(*api.HttpException); err != nil {
-		err.Send(c)
+	if ex != nil {
+		ex.Send(c)
 		return
 	}
 
 	res := api.NewOKResponse(constant.LoginSuccess, data)
+	res.Send(c)
+}
+
+func (h *AuthHandler) Refresh(c *gin.Context) {
+	var request types.RefreshRequest
+
+	err := c.ShouldBind(&request)
+
+	if err != nil {
+		err := api.NewBadRequestException(err.Error(), nil)
+		err.Send(c)
+		return
+	}
+
+	data, ex := h.AuthService.Refresh(c, request.RefreshToken)
+
+	if ex != nil {
+		ex.Send(c)
+		return
+	}
+
+	res := api.NewOKResponse(constant.RefreshSuccess, data)
+	res.Send(c)
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	deviceID := c.GetHeader("x-device-id")
+	accessToken := c.GetHeader("Authorization")
+	accessToken = accessToken[len("Bearer "):]
+
+	if accessToken == "" {
+		err := api.NewBadRequestException(constant.MissingToken, nil)
+		err.Send(c)
+		return
+	}
+
+	data, ex := h.AuthService.Logout(c, deviceID, accessToken)
+
+	if ex != nil {
+		ex.Send(c)
+		return
+	}
+
+	res := api.NewOKResponse(constant.LogoutSuccess, &data)
 	res.Send(c)
 }
