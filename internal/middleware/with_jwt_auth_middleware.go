@@ -32,11 +32,16 @@ func WithJwtAuthMiddleware() gin.HandlerFunc {
 					return
 				}
 
+				deviceID := c.GetHeader("x-device-id")
+				if deviceID == "" {
+					deviceID = "default"
+				}
+
 				c.Set(constant.ContextUserIDKey, claims["sub"])
 				c.Set(constant.ContextUserRolesKey, claims["roles"])
 				c.Set(constant.ContextUserPermissionsKey, claims["permissions"])
 				c.Set(constant.ContextAccessTokenKey, token)
-				c.Set(constant.ContextDeviceIDKey, c.GetHeader("x-device-id"))
+				c.Set(constant.ContextDeviceIDKey, deviceID)
 				c.Next()
 				return
 			}

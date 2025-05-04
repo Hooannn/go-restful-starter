@@ -21,6 +21,10 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 func (h *AuthHandler) Login(c *gin.Context) {
 	deviceID := c.GetHeader(constant.ContextDeviceIDKey)
 
+	if deviceID == "" {
+		deviceID = "default"
+	}
+
 	var request types.LoginRequest
 
 	if err := c.ShouldBind(&request); err != nil {

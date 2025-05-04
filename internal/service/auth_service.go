@@ -134,7 +134,7 @@ func (s *AuthService) Refresh(c *gin.Context, request types.RefreshRequest) (*ty
 		}, nil
 	}
 
-	return nil, exception.NewForbiddenException(err.Error(), err)
+	return nil, exception.NewForbiddenException(constant.InvalidToken, err)
 }
 
 func (s *AuthService) Logout(c *gin.Context, deviceID, accessToken string) (bool, *exception.HttpException) {
