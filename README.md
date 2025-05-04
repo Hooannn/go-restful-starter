@@ -122,6 +122,10 @@ The server will start on `http://localhost:8080`.
 │       ├── route.go
 │       ├── auth_route.go
 │       └── user_route.go
+├── pkg                                      # Shared logic
+│   └── api
+│       ├── http_exception.go
+│       └── http_response.go
 ├── docker-compose.yaml
 ├── docker-compose-prod.yaml
 ├── .env
