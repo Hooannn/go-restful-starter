@@ -44,10 +44,10 @@ Create a `.env` file in the project root and configure the following variables:
 
 ```env
 # Database
-DATABASE_CONNECTION_STRING="host=localhost port=5432 user=postgres password=postgres dbname=EventPlatform sslmode=disable"
+DATABASE_CONNECTION_STRING="host=db port=5432 user=postgres password=postgres dbname=EventPlatform sslmode=disable"
 
 # Redis
-REDIS_ADDRESS="localhost:6379"
+REDIS_ADDRESS="redis:6379"
 REDIS_USERNAME=""
 REDIS_PASSWORD=""
 REDIS_DB=0
