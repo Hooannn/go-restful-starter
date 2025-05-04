@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"log"
+	"net/smtp"
 	"time"
 
 	"github.com/Hooannn/EventPlatform/configs"
@@ -30,7 +32,7 @@ func NewAuthService(userRepo *repository.UserRepository, redisClient *redis.Clie
 }
 
 func (s *AuthService) generateTokens(c *gin.Context, user *entity.User, deviceID string) (string, string, *exception.HttpException) {
-	cfg := configs.LoadConfig(".env")
+	cfg := configs.LoadConfig()
 	accessToken, err := util.CreateAccessToken(user)
 
 	if err != nil {
@@ -43,21 +45,19 @@ func (s *AuthService) generateTokens(c *gin.Context, user *entity.User, deviceID
 		return "", "", exception.NewInteralServerError(err.Error(), err)
 	}
 
-	err = s.RedisClient.Set(
+	if err := s.RedisClient.Set(
 		c,
-		fmt.Sprintf("refresh_token:user_id:%v:device_id:%v", user.ID, deviceID),
+		fmt.Sprintf("%s:user_id:%v:device_id:%s", constant.RefreshTokenKeyPrefix, user.ID, deviceID),
 		refreshToken,
-		time.Duration(cfg.JWTRefreshTokenExpireHours)*time.Hour).Err()
-
-	if err != nil {
+		time.Duration(cfg.JWTRefreshTokenExpireHours)*time.Hour).Err(); err != nil {
 		return "", "", exception.NewInteralServerError(err.Error(), err)
 	}
 
 	return accessToken, refreshToken, nil
 }
 
-func (s *AuthService) Login(c *gin.Context, deviceID, username, password string) (*types.LoginResponse, *exception.HttpException) {
-	user, err := s.UserRepo.GetDetails(entity.User{Email: username})
+func (s *AuthService) Login(c *gin.Context, deviceID string, request types.LoginRequest) (*types.LoginResponse, *exception.HttpException) {
+	user, err := s.UserRepo.GetDetails(entity.User{Email: request.Username})
 
 	invalidException := exception.NewBadRequestException(constant.InvalidCredentials, nil)
 
@@ -65,7 +65,7 @@ func (s *AuthService) Login(c *gin.Context, deviceID, username, password string)
 		return nil, invalidException
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
 		return nil, invalidException
 	}
 
@@ -82,8 +82,10 @@ func (s *AuthService) Login(c *gin.Context, deviceID, username, password string)
 	}, nil
 }
 
-func (s *AuthService) Refresh(c *gin.Context, token string) (*types.RefreshResponse, *exception.HttpException) {
-	cfg := configs.LoadConfig(".env")
+func (s *AuthService) Refresh(c *gin.Context, request types.RefreshRequest) (*types.RefreshResponse, *exception.HttpException) {
+	cfg := configs.LoadConfig()
+
+	token := request.RefreshToken
 
 	isAuthorized, err := util.IsAuthorized(token, cfg.JWTRefreshTokenSecret)
 
@@ -101,7 +103,7 @@ func (s *AuthService) Refresh(c *gin.Context, token string) (*types.RefreshRespo
 		userID := claims["sub"].(string)
 		deviceID := claims["device_id"].(string)
 
-		storedToken, err := s.RedisClient.Get(c, fmt.Sprintf("refresh_token:user_id:%v:device_id:%v", userID, deviceID)).Result()
+		storedToken, err := s.RedisClient.Get(c, fmt.Sprintf("%s:user_id:%v:device_id:%s", constant.RefreshTokenKeyPrefix, userID, deviceID)).Result()
 
 		if err != nil {
 			if err == redis.Nil {
@@ -136,7 +138,7 @@ func (s *AuthService) Refresh(c *gin.Context, token string) (*types.RefreshRespo
 }
 
 func (s *AuthService) Logout(c *gin.Context, deviceID, accessToken string) (bool, *exception.HttpException) {
-	cfg := configs.LoadConfig(".env")
+	cfg := configs.LoadConfig()
 
 	claims, err := util.ExtractToken(accessToken, cfg.JWTAccessTokenSecret)
 
@@ -146,9 +148,83 @@ func (s *AuthService) Logout(c *gin.Context, deviceID, accessToken string) (bool
 
 	userID := claims["sub"].(string)
 
-	if err := s.RedisClient.Del(c, fmt.Sprintf("refresh_token:user_id:%v:device_id:%v", userID, deviceID)).Err(); err != nil {
+	if err := s.RedisClient.Del(c, fmt.Sprintf("%s:user_id:%v:device_id:%s", constant.RefreshTokenKeyPrefix, userID, deviceID)).Err(); err != nil {
 		return false, exception.NewInteralServerError(err.Error(), err)
 	}
 
 	return true, nil
+}
+
+func (s *AuthService) ForgotPasswordOTP(c *gin.Context, request types.ForgotPasswordOTPRequest) (bool, *exception.HttpException) {
+	cfg := configs.LoadConfig()
+	username := request.Username
+	if exists := s.UserRepo.ExistsByUsername(username); !exists {
+		return false, exception.NewBadRequestException(constant.InvalidCredentials, nil)
+	}
+
+	otp := util.GenerateOTP()
+	hashed, err := bcrypt.GenerateFromPassword([]byte(otp), bcrypt.DefaultCost)
+
+	if err != nil {
+		return false, exception.NewInteralServerError(err.Error(), err)
+	}
+
+	if err := s.RedisClient.Set(c, fmt.Sprintf("%s:username:%s", constant.ResetPasswordOTPKeyPrefix, username), string(hashed), time.Duration(cfg.ResetPasswordOTPExpireMinutes)*time.Minute).Err(); err != nil {
+		return false, exception.NewInteralServerError(err.Error(), err)
+	}
+
+	go s.sendForgotPasswordOTPMail(username, otp)
+
+	return true, nil
+}
+
+func (s *AuthService) ResetPasswordOTP(c *gin.Context, request types.ResetPasswordOTPRequest) (bool, *exception.HttpException) {
+	username := request.Username
+	otp := request.OTP
+	password := request.Password
+
+	if exists := s.UserRepo.ExistsByUsername(username); !exists {
+		return false, exception.NewBadRequestException(constant.InvalidCredentials, nil)
+	}
+
+	storedOTP, err := s.RedisClient.Get(c, fmt.Sprintf("%s:username:%s", constant.ResetPasswordOTPKeyPrefix, username)).Result()
+
+	if err != nil {
+		if err == redis.Nil {
+			return false, exception.NewBadRequestException(constant.InvalidCredentials, nil)
+		}
+		return false, exception.NewInteralServerError(err.Error(), err)
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(storedOTP), []byte(otp)); err != nil {
+		return false, exception.NewBadRequestException(constant.InvalidCredentials, nil)
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return false, exception.NewInteralServerError(err.Error(), err)
+	}
+
+	if err := s.RedisClient.Del(c, fmt.Sprintf("%s:username:%s", constant.ResetPasswordOTPKeyPrefix, username)).Err(); err != nil {
+		return false, exception.NewInteralServerError(err.Error(), err)
+	} else {
+		success := s.UserRepo.UpdatePasswordByUsername(username, string(hashed))
+		return success, nil
+	}
+}
+
+func (s *AuthService) sendForgotPasswordOTPMail(username, otp string) {
+	cfg := configs.LoadConfig()
+	subject := "Forgot Password OTP"
+	body := fmt.Sprintf("Your OTP is: %s", otp)
+	message := []byte(fmt.Sprintf("Subject: %s\n\n%s", subject, body))
+
+	auth := smtp.PlainAuth("", cfg.EmailSender, cfg.EmailPassword, cfg.SMTPHost)
+
+	if err := smtp.SendMail(fmt.Sprintf("%s:%v", cfg.SMTPHost, cfg.SMTPPort), auth, cfg.EmailSender, []string{username}, message); err != nil {
+		log.Println("Failed to send forgot password otp email to", username, "err:", err)
+	} else {
+		log.Println("Forgot password otp email sent to", username)
+	}
 }

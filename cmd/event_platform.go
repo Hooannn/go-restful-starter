@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"os"
 
 	"github.com/Hooannn/EventPlatform/configs"
 	"github.com/Hooannn/EventPlatform/internal/entity"
@@ -13,7 +15,16 @@ import (
 )
 
 func main() {
-	cfg := configs.LoadConfig(".env")
+	cfg := configs.LoadConfig()
+
+	if cfg.AppEnv == "development" {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		gin.DisableConsoleColor()
+		f, _ := os.Create("server.log")
+		gin.DefaultWriter = io.MultiWriter(f)
+	}
 
 	db, err := entity.InitDB()
 	if err != nil {
@@ -23,7 +34,6 @@ func main() {
 	}
 
 	redisClient, err := redis.InitRedis()
-
 	if err != nil {
 		log.Fatalf("❌ Failed to connect to redis: %v", err)
 	} else {

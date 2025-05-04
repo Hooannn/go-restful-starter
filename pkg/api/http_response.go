@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/Hooannn/EventPlatform/internal/constant"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +14,7 @@ type HttpResponse[T any] struct {
 }
 
 func (r *HttpResponse[T]) Send(c *gin.Context) {
+	c.Set(constant.ContextResponseKey, r)
 	c.JSON(r.Code, r)
 }
 

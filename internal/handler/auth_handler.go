@@ -19,19 +19,17 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	deviceID := c.GetHeader("x-device-id")
+	deviceID := c.GetHeader(constant.ContextDeviceIDKey)
 
 	var request types.LoginRequest
 
-	err := c.ShouldBind(&request)
-
-	if err != nil {
+	if err := c.ShouldBind(&request); err != nil {
 		err := api.NewBadRequestException(err.Error(), nil)
 		err.Send(c)
 		return
 	}
 
-	data, ex := h.AuthService.Login(c, deviceID, request.Username, request.Password)
+	data, ex := h.AuthService.Login(c, deviceID, request)
 
 	if ex != nil {
 		ex.Send(c)
@@ -45,15 +43,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) Refresh(c *gin.Context) {
 	var request types.RefreshRequest
 
-	err := c.ShouldBind(&request)
-
-	if err != nil {
+	if err := c.ShouldBind(&request); err != nil {
 		err := api.NewBadRequestException(err.Error(), nil)
 		err.Send(c)
 		return
 	}
 
-	data, ex := h.AuthService.Refresh(c, request.RefreshToken)
+	data, ex := h.AuthService.Refresh(c, request)
 
 	if ex != nil {
 		ex.Send(c)
@@ -65,9 +61,8 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	deviceID := c.GetHeader("x-device-id")
-	accessToken := c.GetHeader("Authorization")
-	accessToken = accessToken[len("Bearer "):]
+	deviceID := c.GetString(constant.ContextDeviceIDKey)
+	accessToken := c.GetString(constant.ContextAccessTokenKey)
 
 	if accessToken == "" {
 		err := api.NewBadRequestException(constant.MissingToken, nil)
@@ -83,5 +78,45 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	res := api.NewOKResponse(constant.LogoutSuccess, &data)
+	res.Send(c)
+}
+
+func (h *AuthHandler) ForgotPasswordOTP(c *gin.Context) {
+	var request types.ForgotPasswordOTPRequest
+
+	if err := c.ShouldBind(&request); err != nil {
+		err := api.NewBadRequestException(err.Error(), nil)
+		err.Send(c)
+		return
+	}
+
+	data, ex := h.AuthService.ForgotPasswordOTP(c, request)
+
+	if ex != nil {
+		ex.Send(c)
+		return
+	}
+
+	res := api.NewOKResponse(constant.ForgotPasswordOTPSuccess, &data)
+	res.Send(c)
+}
+
+func (h *AuthHandler) ResetPasswordOTP(c *gin.Context) {
+	var request types.ResetPasswordOTPRequest
+
+	if err := c.ShouldBind(&request); err != nil {
+		err := api.NewBadRequestException(err.Error(), nil)
+		err.Send(c)
+		return
+	}
+
+	data, ex := h.AuthService.ResetPasswordOTP(c, request)
+
+	if ex != nil {
+		ex.Send(c)
+		return
+	}
+
+	res := api.NewOKResponse(constant.ResetPasswordOTPSuccess, &data)
 	res.Send(c)
 }

@@ -25,6 +25,16 @@ type RefreshResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type ForgotPasswordOTPRequest struct {
+	Username string `json:"username" binding:"required,email"`
+}
+
+type ResetPasswordOTPRequest struct {
+	Username string `json:"username" binding:"required,email"`
+	OTP      string `json:"otp" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type LoginRequest struct {
 	Username string `json:"username" binding:"required,email"`
 	Password string `json:"password" binding:"required"`

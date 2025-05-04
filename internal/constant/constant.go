@@ -12,7 +12,26 @@ const (
 
 // Success codes for authentication
 const (
-	LoginSuccess   string = "login_success"
-	LogoutSuccess  string = "logout_success"
-	RefreshSuccess string = "refresh_success"
+	LoginSuccess             string = "login_success"
+	LogoutSuccess            string = "logout_success"
+	RefreshSuccess           string = "refresh_success"
+	ForgotPasswordOTPSuccess string = "forgot_password_otp_success"
+	ResetPasswordOTPSuccess  string = "reset_password_otp_success"
+)
+
+// Gin context keys
+const (
+	ContextResponseKey        string = "x-response"
+	ContextUserIDKey          string = "x-user-id"
+	ContextUserRolesKey       string = "x-user-roles"
+	ContextUserPermissionsKey string = "x-user-permissions"
+	ContextAccessTokenKey     string = "x-access-token"
+	ContextDeviceIDKey        string = "x-device-id"
+)
+
+// Prefix for redis keys
+const (
+	CacheKeyPrefix            string = "cache"
+	ResetPasswordOTPKeyPrefix string = "reset_password_otp"
+	RefreshTokenKeyPrefix     string = "refresh_token"
 )

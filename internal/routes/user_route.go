@@ -8,8 +8,7 @@ import (
 
 func NewUserRoute(group *gin.RouterGroup, f *factory.Factory) {
 	v1 := group.Group("/v1/users")
-	v1.GET("/", f.UserHandler.GetAuthenticatedUser)
-
-	v2 := group.Group("/v2/users")
-	v2.GET("/", middleware.WithPermissions([]string{"read:users"}), f.UserHandler.GetAuthenticatedUser)
+	v1.GET("/me", f.UserHandler.GetAuthenticatedUser)
+	v1.GET("/", middleware.WithPermissions([]string{"read:users"}), middleware.WithCache(f.RedisClient), f.UserHandler.GetAllUsers)
+	v1.POST("/", middleware.WithPermissions([]string{"create:users"}), f.UserHandler.CreateUser, middleware.InvalidateCache(f.RedisClient, "/v1/users/"))
 }

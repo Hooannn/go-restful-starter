@@ -2,7 +2,9 @@ package util
 
 import (
 	"errors"
+	"math/rand"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/Hooannn/EventPlatform/configs"
@@ -13,7 +15,7 @@ import (
 )
 
 func CreateAccessToken(user *entity.User) (string, error) {
-	cfg := configs.LoadConfig(".env")
+	cfg := configs.LoadConfig()
 	exp := time.Now().Add(time.Hour * time.Duration(cfg.JWTAccessTokenExpireHours)).Unix()
 
 	roles := make([]string, 0)
@@ -49,7 +51,7 @@ func CreateAccessToken(user *entity.User) (string, error) {
 }
 
 func CreateRefreshToken(user *entity.User, deviceID string) (string, error) {
-	cfg := configs.LoadConfig(".env")
+	cfg := configs.LoadConfig()
 	exp := time.Now().Add(time.Hour * time.Duration(cfg.JWTRefreshTokenExpireHours)).Unix()
 
 	claims := &types.JwtRefreshTokenClaims{
@@ -122,4 +124,12 @@ func ExtractToken(requestToken string, secret string) (jwt.MapClaims, error) {
 	}
 
 	return claims, nil
+}
+
+func GenerateOTP() string {
+	otp := ""
+	for range 6 {
+		otp += strconv.Itoa(rand.Intn(10))
+	}
+	return otp
 }

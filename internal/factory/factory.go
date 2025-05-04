@@ -11,6 +11,9 @@ import (
 type Factory struct {
 	UserHandler *handler.UserHandler
 	AuthHandler *handler.AuthHandler
+
+	DB          *gorm.DB
+	RedisClient *redis.Client
 }
 
 func NewFactory(db *gorm.DB, redisClient *redis.Client) *Factory {
@@ -24,5 +27,7 @@ func NewFactory(db *gorm.DB, redisClient *redis.Client) *Factory {
 	return &Factory{
 		UserHandler: handler.NewUserHandler(userService),
 		AuthHandler: handler.NewAuthHandler(authService),
+		DB:          db,
+		RedisClient: redisClient,
 	}
 }

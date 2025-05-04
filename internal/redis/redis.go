@@ -6,7 +6,7 @@ import (
 )
 
 func InitRedis() (*r.Client, error) {
-	cfg := configs.LoadConfig(".env")
+	cfg := configs.LoadConfig()
 	return r.NewClient(&r.Options{
 		Addr:     cfg.RedisAddress,
 		Username: cfg.RedisUsername,

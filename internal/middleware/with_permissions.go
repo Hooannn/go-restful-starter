@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/Hooannn/EventPlatform/internal/constant"
 	"github.com/Hooannn/EventPlatform/pkg/api"
 	"github.com/gin-gonic/gin"
 )
 
 func WithPermissions(requiredPermissions []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		getPermissions, exist := c.Get("x-user-permissions")
+		getPermissions, exist := c.Get(constant.ContextUserPermissionsKey)
 		userPermissions := make([]string, len(getPermissions.([]interface{})))
 
 		for i, v := range getPermissions.([]interface{}) {

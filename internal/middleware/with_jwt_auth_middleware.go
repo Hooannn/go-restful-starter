@@ -13,7 +13,7 @@ import (
 
 func WithJwtAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cfg := configs.LoadConfig(".env")
+		cfg := configs.LoadConfig()
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if parts := strings.Split(authHeader, " "); len(parts) == 2 {
@@ -32,9 +32,11 @@ func WithJwtAuthMiddleware() gin.HandlerFunc {
 					return
 				}
 
-				c.Set("x-user-id", claims["sub"])
-				c.Set("x-user-roles", claims["roles"])
-				c.Set("x-user-permissions", claims["permissions"])
+				c.Set(constant.ContextUserIDKey, claims["sub"])
+				c.Set(constant.ContextUserRolesKey, claims["roles"])
+				c.Set(constant.ContextUserPermissionsKey, claims["permissions"])
+				c.Set(constant.ContextAccessTokenKey, token)
+				c.Set(constant.ContextDeviceIDKey, c.GetHeader("x-device-id"))
 				c.Next()
 				return
 			}
