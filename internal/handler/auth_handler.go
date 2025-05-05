@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"github.com/Hooannn/EventPlatform/internal/constant"
-	"github.com/Hooannn/EventPlatform/internal/service"
-	"github.com/Hooannn/EventPlatform/internal/types"
-	api "github.com/Hooannn/EventPlatform/pkg/api"
+	"github.com/Hooannn/go-restful-starter/internal/constant"
+	"github.com/Hooannn/go-restful-starter/internal/service"
+	"github.com/Hooannn/go-restful-starter/internal/types"
+	api "github.com/Hooannn/go-restful-starter/pkg/api"
 	"github.com/gin-gonic/gin"
 )
 

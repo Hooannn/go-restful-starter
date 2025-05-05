@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Hooannn/EventPlatform/configs"
-	"github.com/Hooannn/EventPlatform/internal/constant"
-	"github.com/Hooannn/EventPlatform/internal/entity"
-	"github.com/Hooannn/EventPlatform/internal/types"
+	"github.com/Hooannn/go-restful-starter/configs"
+	"github.com/Hooannn/go-restful-starter/internal/constant"
+	"github.com/Hooannn/go-restful-starter/internal/entity"
+	"github.com/Hooannn/go-restful-starter/internal/types"
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 

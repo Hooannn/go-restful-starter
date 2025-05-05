@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"github.com/Hooannn/EventPlatform/configs"
+	"github.com/Hooannn/go-restful-starter/configs"
 	r "github.com/redis/go-redis/v9"
 )
 

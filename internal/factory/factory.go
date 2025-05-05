@@ -1,9 +1,9 @@
 package factory
 
 import (
-	"github.com/Hooannn/EventPlatform/internal/handler"
-	"github.com/Hooannn/EventPlatform/internal/repository"
-	"github.com/Hooannn/EventPlatform/internal/service"
+	"github.com/Hooannn/go-restful-starter/internal/handler"
+	"github.com/Hooannn/go-restful-starter/internal/repository"
+	"github.com/Hooannn/go-restful-starter/internal/service"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )

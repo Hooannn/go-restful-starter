@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/Hooannn/EventPlatform/internal/constant"
-	"github.com/Hooannn/EventPlatform/pkg/api"
+	"github.com/Hooannn/go-restful-starter/internal/constant"
+	"github.com/Hooannn/go-restful-starter/pkg/api"
 	"github.com/gin-gonic/gin"
 )
 

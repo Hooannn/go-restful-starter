@@ -3,10 +3,10 @@ package service
 import (
 	"net/http"
 
-	"github.com/Hooannn/EventPlatform/internal/entity"
-	"github.com/Hooannn/EventPlatform/internal/repository"
-	"github.com/Hooannn/EventPlatform/internal/types"
-	exception "github.com/Hooannn/EventPlatform/pkg/api"
+	"github.com/Hooannn/go-restful-starter/internal/entity"
+	"github.com/Hooannn/go-restful-starter/internal/repository"
+	"github.com/Hooannn/go-restful-starter/internal/types"
+	exception "github.com/Hooannn/go-restful-starter/pkg/api"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )

@@ -1,4 +1,4 @@
-module github.com/Hooannn/EventPlatform
+module github.com/Hooannn/go-restful-starter
 
 go 1.23.0
 

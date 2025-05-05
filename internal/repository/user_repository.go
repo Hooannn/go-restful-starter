@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/Hooannn/EventPlatform/internal/entity"
+	"github.com/Hooannn/go-restful-starter/internal/entity"
 	"gorm.io/gorm"
 )
 

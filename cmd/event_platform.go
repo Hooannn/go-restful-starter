@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/Hooannn/EventPlatform/configs"
-	"github.com/Hooannn/EventPlatform/internal/entity"
-	"github.com/Hooannn/EventPlatform/internal/factory"
-	"github.com/Hooannn/EventPlatform/internal/redis"
-	"github.com/Hooannn/EventPlatform/internal/routes"
+	"github.com/Hooannn/go-restful-starter/configs"
+	"github.com/Hooannn/go-restful-starter/internal/entity"
+	"github.com/Hooannn/go-restful-starter/internal/factory"
+	"github.com/Hooannn/go-restful-starter/internal/redis"
+	"github.com/Hooannn/go-restful-starter/internal/routes"
 	"github.com/gin-gonic/gin"
 )
 

@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"github.com/Hooannn/EventPlatform/configs"
+	"github.com/Hooannn/go-restful-starter/configs"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

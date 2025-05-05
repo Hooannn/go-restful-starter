@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/Hooannn/EventPlatform/internal/factory"
-	"github.com/Hooannn/EventPlatform/internal/middleware"
+	"github.com/Hooannn/go-restful-starter/internal/factory"
+	"github.com/Hooannn/go-restful-starter/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 

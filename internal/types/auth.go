@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/Hooannn/EventPlatform/internal/entity"
+	"github.com/Hooannn/go-restful-starter/internal/entity"
 	"github.com/golang-jwt/jwt/v5"
 )
 

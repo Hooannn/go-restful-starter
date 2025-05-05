@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/Hooannn/EventPlatform/internal/constant"
+	"github.com/Hooannn/go-restful-starter/internal/constant"
 	"github.com/gin-gonic/gin"
 )
 
