@@ -106,7 +106,7 @@ The server will start on `http://localhost:8080`.
 │   ├── repository                           # Database access layer
 │   │   └── user_repository.go
 │   ├── middleware                           # Custom middleware (e.g., JWT)
-│   │   ├── with_jwt_auth_middleware.go
+│   │   ├── invalidate_cache.go
 │   │   ├── with_cache.go
 │   │   ├── with_jwt_auth_middleware.go
 │   │   └── with_permissions.go
