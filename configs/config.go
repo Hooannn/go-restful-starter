@@ -28,6 +28,13 @@ type Config struct {
 	SMTPHost                      string
 	SMTPPort                      int
 	DefaultCacheExpireMinutes     int
+	JaegerHost                    string
+	JaegerPort                    int
+	RootUser                      string
+	RootUserPassword              string
+	RootRoleName                  string
+	RootRoleDescription           string
+	RootRolePermissions           string
 }
 
 var (
@@ -75,6 +82,13 @@ func LoadConfig() *Config {
 			SMTPHost:                      getEnv("SMTP_HOST", "smtp.example.com"),
 			SMTPPort:                      getEnvAsInt("SMTP_PORT", 587),
 			DefaultCacheExpireMinutes:     getEnvAsInt("DEFAULT_CACHE_EXPIRE_MINUTES", 10),
+			JaegerHost:                    getEnv("JAEGER_HOST", "localhost"),
+			JaegerPort:                    getEnvAsInt("JAEGER_PORT", 4317),
+			RootUser:                      getEnv("ROOT_USER", "root@gmail.com"),
+			RootUserPassword:              getEnv("ROOT_USER_PASSWORD", "root"),
+			RootRoleName:                  getEnv("ROOT_ROLE_NAME", "root"),
+			RootRoleDescription:           getEnv("ROOT_ROLE_DESCRIPTION", "Root role of the system"),
+			RootRolePermissions:           getEnv("ROOT_ROLE_PERMISSIONS", "read:*,create:*,delete:*,update:*"),
 		}
 	})
 	return cfg

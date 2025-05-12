@@ -11,6 +11,11 @@ services:
       - ./data/postgresql:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
@@ -21,6 +26,24 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317"
+      - "4318:4318"
+      - "14268:14268"
+      - "14269:14269"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    volumes:
+      - ./data/jaeger:/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:14269/api/traces"]
       interval: 30s
       timeout: 10s
       retries: 3
